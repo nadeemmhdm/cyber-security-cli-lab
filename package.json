@@ -1,0 +1,29 @@
+{
+  "name": "cyber-security-cli-lab",
+  "version": "1.0.0",
+  "description": "Interactive in-browser Linux wargame with 35 progressive cybersecurity levels, terminal emulator, dynamic random passwords, and command attribute inspector.",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx -y serve -l 8085 .",
+    "dev": "npx -y serve -l 8085 .",
+    "test": "node -c js/*.js"
+  },
+  "keywords": [
+    "cybersecurity",
+    "wargame",
+    "bandit",
+    "linux",
+    "cli",
+    "terminal-emulator",
+    "ethical-hacking",
+    "ctf",
+    "linux-commands",
+    "education"
+  ],
+  "author": "Antigravity DefSec Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/cyber-security-cli-lab.git"
+  }
+}

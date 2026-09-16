@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyber Security CLI Lab - 35 Progressive Linux Wargame Levels</title>
+  
+  <!-- SEO, AEO & Social Sharing Meta Tags -->
+  <meta name="description" content="Master Linux commands and cybersecurity tooling with this interactive 35-level CLI wargame. Learn shell navigation, file permissions, cryptography, network recon, and privilege escalation with interactive command attribute inspectors.">
+  <meta name="keywords" content="cybersecurity lab, linux commands, cli wargame, bandit ctf, overthewire, linux security, shell terminal, privilege escalation, ethical hacking tutorial">
+  <meta name="author" content="Antigravity CyberLab">
+  <meta name="theme-color" content="#060911">
+  <meta property="og:title" content="Cyber Security CLI Lab - 35 Progressive Levels">
+  <meta property="og:description" content="Interactive browser-based Linux terminal wargame to master command attributes, forensics, and cybersecurity tools.">
+  <meta property="og:type" content="website">
+
+  <!-- Modern Fonts (Outfit & JetBrains Mono) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Boxicons Icon Library -->
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/terminal.css">
+</head>
+<body>
+
+  <!-- Top App Navigation Bar -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="brand-logo-shield">
+        <i class="bx bx-shield-quarter"></i>
+      </div>
+      <div class="brand-text">
+        <h1>CYBER<span>LAB</span></h1>
+        <div class="brand-subtitle">Linux Security Wargame</div>
+      </div>
+    </div>
+
+    <!-- Center Gamification Status -->
+    <div class="header-center-stats">
+      <div class="stat-pill" title="Current Level">
+        <i class="bx bx-layer"></i>
+        <span id="headerLevelBadge">Level 0</span>
+      </div>
+      <div class="stat-pill" title="Levels Completed">
+        <i class="bx bx-check-shield"></i>
+        <span>Done: <strong id="headerCompletedCount">0/35</strong></span>
+      </div>
+      <div class="stat-pill" title="Current Score">
+        <i class="bx bx-trophy"></i>
+        <strong id="headerScoreCount">0 PTS</strong>
+      </div>
+    </div>
+
+    <!-- Right Header Action Controls -->
+    <div class="header-actions">
+      <button class="btn-nav highlight" id="btnOpenManual" title="Command Manual & Attribute Explorer">
+        <i class="bx bx-book-open"></i>
+        <span>Help & Attributes</span>
+      </button>
+
+      <button class="btn-nav" id="btnOpenHints" title="Level Hints & Clues">
+        <i class="bx bx-bulb"></i>
+        <span>Hint</span>
+      </button>
+
+      <button class="btn-nav" id="btnOpenLevels" title="View All 35 Levels Map">
+        <i class="bx bx-grid-alt"></i>
+        <span>Levels (35)</span>
+      </button>
+
+      <button class="btn-nav btn-icon-only active" id="btnToggleSound" title="Toggle Sound Feedback">
+        <i class="bx bx-volume-full"></i>
+      </button>
+
+      <button class="btn-nav btn-icon-only" id="btnOpenSettings" title="Progress & Save Options">
+        <i class="bx bx-cog"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Application Grid -->
+  <main class="app-main">
+    <!-- Left Column: Terminal & Mobile Controls -->
+    <section class="terminal-column" aria-label="Interactive Terminal">
+      <div class="terminal-container" id="terminalContainer">
+        <!-- Injected dynamically by Terminal class -->
+      </div>
+
+      <!-- Quick Virtual Keys for Mobile / Rapid Typing -->
+      <nav class="mobile-virtual-toolbar" aria-label="Terminal Virtual Controls">
+        <button class="virtual-key accent" data-action="tab" title="Auto-complete command or filename">Tab</button>
+        <button class="virtual-key" data-action="ctrl-c" title="Cancel line">Ctrl+C</button>
+        <button class="virtual-key" data-insert=" | " title="Pipe output">|</button>
+        <button class="virtual-key" data-insert="-" title="Dash">-</button>
+        <button class="virtual-key" data-insert="/" title="Slash">/</button>
+        <button class="virtual-key" data-insert="~" title="Home directory">~</button>
+        <button class="virtual-key" data-insert="." title="Current directory">.</button>
+        <button class="virtual-key" data-insert="ls -la" title="List all files">ls -la</button>
+        <button class="virtual-key" data-action="hint" title="Show level hints">Hint</button>
+        <button class="virtual-key" data-action="clear" title="Clear terminal screen">Clear</button>
+        <button class="virtual-key accent" data-action="enter" title="Execute command">Enter</button>
+      </nav>
+    </section>
+
+    <!-- Right Column: Mission Briefing, Recommended Attributes & Flag Submission -->
+    <aside class="sidebar-column" aria-label="Mission Briefing & Submissions">
+      <!-- Mission Objective Card -->
+      <div class="sidebar-card">
+        <div class="card-header-row">
+          <div class="level-meta-tags">
+            <span class="badge" id="sidebarLevelCategory">Linux Basics</span>
+            <span class="badge badge-beginner" id="sidebarLevelDiff">Beginner</span>
+          </div>
+        </div>
+
+        <h2 class="sidebar-title" id="sidebarLevelTitle">Level 0: The Readme & First Steps</h2>
+
+        <div class="objective-box">
+          <h4><i class="bx bx-target-lock"></i> Mission Objective</h4>
+          <p id="sidebarLevelObjective">
+            The password for Level 1 is stored in a file called 'readme' located in your home directory. Read this file to retrieve the password token.
+          </p>
+        </div>
+
+        <!-- Recommended Commands for this level -->
+        <div class="recommended-section">
+          <h4><i class="bx bx-terminal"></i> Recommended Commands & Tools</h4>
+          <div class="cmd-pill-row" id="sidebarCmdList">
+            <!-- Injected dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Password / Flag Submission Card -->
+      <div class="submission-card">
+        <h3><i class="bx bx-key"></i> Submit Level Password</h3>
+        <p>Found the token? Submit it here or run <code>submit &lt;password&gt;</code> directly in the terminal to unlock the next level.</p>
+        
+        <form id="flagSubmitForm" class="flag-input-group">
+          <input type="text" id="sidebarFlagInput" class="flag-input" placeholder="Enter discovered password..." autocomplete="off" spellcheck="false" required>
+          <button type="submit" class="btn-submit">
+            <span>Submit</span>
+            <i class="bx bx-right-arrow-alt"></i>
+          </button>
+        </form>
+      </div>
+
+      <!-- Quick Interactive Shortcuts -->
+      <div class="quick-tools-card">
+        <h4><i class="bx bx-wrench"></i> Fast Utilities</h4>
+        <button class="tool-action-btn" onclick="window.app.openManualModal('ls')">
+          <span><i class="bx bx-slider-alt"></i> View Command Attributes (e.g. <code>ls -a</code>)</span>
+          <i class="bx bx-chevron-right"></i>
+        </button>
+        <button class="tool-action-btn" onclick="window.app.openHintModal()">
+          <span><i class="bx bx-bulb"></i> View 3-Tier Clues & Hints</span>
+          <i class="bx bx-chevron-right"></i>
+        </button>
+        <button class="tool-action-btn" onclick="window.app.openLevelsModal()">
+          <span><i class="bx bx-map-alt"></i> Browse All 35 Lab Levels</span>
+          <i class="bx bx-chevron-right"></i>
+        </button>
+      </div>
+    </aside>
+  </main>
+
+  <!-- =========================================================
+       MODAL 1: COMMAND MANUAL & ATTRIBUTE INSPECTOR
+       ========================================================= -->
+  <div class="modal-wrapper" id="manualModal" role="dialog" aria-modal="true" aria-labelledby="manualModalTitle">
+    <div class="modal-backdrop"></div>
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 id="manualModalTitle"><i class="bx bx-book-open"></i> Command Manual & Interactive Attribute Inspector</h2>
+        <button class="modal-close" aria-label="Close Manual">&times;</button>
+      </div>
+      <div class="manual-modal-layout">
+        <!-- Sidebar Command Navigation -->
+        <div class="manual-sidebar-pane">
+          <div class="manual-search-box">
+            <i class="bx bx-search"></i>
+            <input type="text" id="manualSearchInput" placeholder="Filter commands (e.g. ls, grep, find)..." />
+          </div>
+          <div class="manual-commands-list" id="manualCommandsList">
+            <!-- Populated dynamically from COMMAND_DOCS -->
+          </div>
+        </div>
+
+        <!-- Detailed Attributes & Security Usage Display -->
+        <div class="manual-content-pane" id="manualDetailDisplay">
+          <!-- Populated dynamically when command is clicked -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 2: HINTS MODAL
+       ========================================================= -->
+  <div class="modal-wrapper" id="hintModal" role="dialog" aria-modal="true" aria-labelledby="hintModalTitle">
+    <div class="modal-backdrop"></div>
+    <div class="modal-container" style="max-width: 700px;">
+      <div class="modal-header">
+        <h2 id="hintModalTitle"><i class="bx bx-bulb"></i> Level Clues & Progressive Hints</h2>
+        <button class="modal-close" aria-label="Close Hints">&times;</button>
+      </div>
+      <div class="hint-modal-body" id="hintModalBody">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 3: 35 LEVELS MAP GRID
+       ========================================================= -->
+  <div class="modal-wrapper" id="levelsModal" role="dialog" aria-modal="true" aria-labelledby="levelsModalTitle">
+    <div class="modal-backdrop"></div>
+    <div class="modal-container" style="max-width: 980px;">
+      <div class="modal-header">
+        <h2 id="levelsModalTitle"><i class="bx bx-grid-alt"></i> Cyber Security Lab Levels (0 to 34)</h2>
+        <button class="modal-close" aria-label="Close Levels Map">&times;</button>
+      </div>
+      <div class="levels-modal-body">
+        <div class="levels-grid" id="levelsGrid">
+          <!-- 35 cards populated dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 4: SETTINGS & BACKUP PROGRESS
+       ========================================================= -->
+  <div class="modal-wrapper" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+    <div class="modal-backdrop"></div>
+    <div class="modal-container" style="max-width: 580px;">
+      <div class="modal-header">
+        <h2 id="settingsModalTitle"><i class="bx bx-cog"></i> Progress & Laboratory Options</h2>
+        <button class="modal-close" aria-label="Close Settings">&times;</button>
+      </div>
+      <div class="settings-modal-body">
+        <div class="settings-stats-row">
+          <div class="settings-stat-box">
+            <div class="val" id="settingsUnlockedCount">1</div>
+            <div class="lbl">Unlocked</div>
+          </div>
+          <div class="settings-stat-box">
+            <div class="val" id="settingsCompletedCount">0</div>
+            <div class="lbl">Completed</div>
+          </div>
+          <div class="settings-stat-box">
+            <div class="val" id="settingsTotalCmds">0</div>
+            <div class="lbl">Commands Run</div>
+          </div>
+        </div>
+
+        <div class="settings-actions-group">
+          <button class="btn-nav highlight" id="btnExportProgress">
+            <i class="bx bx-download"></i> Export Progress File (JSON)
+          </button>
+          
+          <button class="btn-nav" id="btnImportProgressTrigger">
+            <i class="bx bx-upload"></i> Import Progress Backup
+          </button>
+          <input type="file" id="importFileInput" accept=".json" style="display: none;" />
+
+          <button class="btn-nav" id="btnRandomizePasswords" title="Generate fresh random passwords for all 35 levels">
+            <i class="bx bx-dice-5"></i> Re-roll / Randomize All Passwords
+          </button>
+
+          <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 8px 0;" />
+
+          <button class="btn-nav btn-danger" id="btnResetProgress">
+            <i class="bx bx-reset"></i> Reset All Progress to Level 0
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Modules in Dependency Order -->
+  <script src="js/vfs.js"></script>
+  <script src="js/commandDocs.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/terminal.js"></script>
+  <script src="js/commands.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

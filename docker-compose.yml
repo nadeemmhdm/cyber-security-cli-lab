@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  cyberlab:
+    build: .
+    container_name: cyberlab-cli
+    ports:
+      - "8085:80"
+    restart: unless-stopped
