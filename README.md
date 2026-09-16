@@ -28,14 +28,11 @@ Inspired by **OverTheWire Bandit** and **TryHackMe**, featuring an in-browser Li
 
 ## 🚀 Quick Start & Access (Run in Seconds)
 
-Choose the setup method that works best for you:
+### 1. 🌐 Live Online (Zero Installation - Play in Browser)
+The lab is deployed and live for anyone to access directly:
+👉 **[https://nadeemmhdm.github.io/cyber-security-cli-lab/](https://nadeemmhdm.github.io/cyber-security-cli-lab/)**
 
-### 1. 🌐 Live Online (Zero Installation)
-If deployed on GitHub Pages, visit:
-```
-https://<your-username>.github.io/<repository-name>/
-```
-*(Deploying takes 1 click—see [Publishing to GitHub Pages](#-publishing-to-github-pages) below).*
+No installation, no downloads—instant interactive browser terminal!
 
 ---
 

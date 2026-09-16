@@ -22,8 +22,9 @@
   ],
   "author": "Antigravity DefSec Team",
   "license": "MIT",
+  "homepage": "https://nadeemmhdm.github.io/cyber-security-cli-lab/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/cyber-security-cli-lab.git"
+    "url": "https://github.com/nadeemmhdm/cyber-security-cli-lab.git"
   }
 }
