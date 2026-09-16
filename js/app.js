@@ -79,22 +79,6 @@ class App {
       });
     }
 
-    // Quick Paste Button in Sidebar Submission
-    document.getElementById('btnPasteFlag')?.addEventListener('click', async () => {
-      try {
-        const text = await navigator.clipboard.readText();
-        if (text && text.trim()) {
-          const input = document.getElementById('sidebarFlagInput');
-          if (input) {
-            input.value = text.trim();
-            input.focus();
-            this.showToast('📋 Pasted token into submission box!', 'bx-paste');
-          }
-        }
-      } catch (e) {
-        this.showToast('Please paste manually (Ctrl+V)', 'bx-info-circle');
-      }
-    });
 
     // Global click listener for copyable password tokens
     document.addEventListener('click', (e) => {
