@@ -8,7 +8,6 @@ class CommandEngine {
     this.vfs = vfs;
     this.storage = storage;
     this.terminal = terminal;
-    this.assistantEnabled = typeof localStorage !== 'undefined' ? (localStorage.getItem('cyber_assistant_enabled') !== 'false') : true;
     this.env = {
       USER: 'level0',
       HOME: '/home/level0',
@@ -250,24 +249,8 @@ class CommandEngine {
           return { stdout: `Opening manual for '${args[0]}'... (Check the manual inspector modal)`, stderr: '' };
         }
         return { stdout: '', stderr: `No manual entry for ${args[0]}` };
-      case 'explain':
-        return this.cmdExplain(args);
-      case 'assistant':
-      case 'ai':
-        return this.cmdAssistant(args);
-      default: {
-        let msg = `bash: ${cmd}: command not found. Type 'help' for available commands.`;
-        if (this.assistantEnabled) {
-          const known = Object.keys(window.COMMAND_DOCS || {}).concat([
-            'submit', 'clear', 'hint', 'explain', 'assistant', 'su', 'history', 'cat', 'ls', 'cd', 'file', 'find', 'grep', 'pwd', 'whoami'
-          ]);
-          const suggestion = known.find(k => k.startsWith(cmd.slice(0, 2)) || Math.abs(k.length - cmd.length) <= 1);
-          if (suggestion) {
-            msg += `\n\x1b[1;33m🤖 [Cyber Assistant]:\x1b[0m Did you mean '\x1b[1;32m${suggestion}\x1b[0m'? (Run '\x1b[1;36mexplain ${suggestion}\x1b[0m' to learn its flags)`;
-          }
-        }
-        return { stdout: '', stderr: msg };
-      }
+      default:
+        return { stdout: '', stderr: `bash: ${cmd}: command not found. Type 'help' for available commands.` };
     }
   }
 
@@ -287,97 +270,6 @@ class CommandEngine {
       return { stdout: `[+] Displaying credential archive...\nLevel 27 Password: ${pwd27}`, stderr: '' };
     }
     return { stdout: scriptContent, stderr: '' };
-  }
-
-  cmdAssistant(args) {
-    if (args[0] === 'off' || args[0] === 'disable') {
-      this.assistantEnabled = false;
-      if (typeof localStorage !== 'undefined') localStorage.setItem('cyber_assistant_enabled', 'false');
-      window.app?.updateAssistantUI?.(false);
-      return { stdout: '🤖 Cyber Assistant disabled. (Type "assistant on" to re-enable)', stderr: '' };
-    } else if (args[0] === 'on' || args[0] === 'enable') {
-      this.assistantEnabled = true;
-      if (typeof localStorage !== 'undefined') localStorage.setItem('cyber_assistant_enabled', 'true');
-      window.app?.updateAssistantUI?.(true);
-      return { stdout: '🤖 Cyber Assistant enabled! Smart diagnostics and tips are now active.', stderr: '' };
-    }
-    return {
-      stdout: `🤖 Cyber Assistant is currently ${this.assistantEnabled ? '\x1b[1;32mACTIVE\x1b[0m' : '\x1b[1;31mDISABLED\x1b[0m'}.\nUsage: 'assistant on' | 'assistant off' | 'explain <command>'`,
-      stderr: ''
-    };
-  }
-
-  cmdExplain(args) {
-    if (args.length === 0) {
-      return {
-        stdout: 
-`\x1b[1;36m========================================================================\x1b[0m
- \x1b[1;32m🔍 SMART COMMAND EXPLAINER (CYBER SENTINEL DECONSTRUCTOR)\x1b[0m
-\x1b[1;36m========================================================================\x1b[0m
-Type: \x1b[1;33mexplain <command> [attributes/flags] [arguments]\x1b[0m
-
-Examples:
-  • \x1b[1;36mexplain ls -la\x1b[0m                 (Explains long listing & hidden dotfiles)
-  • \x1b[1;36mexplain find -size 1033c\x1b[0m       (Explains file size filtering attributes)
-  • \x1b[1;36mexplain grep -i "pass" data.txt\x1b[0m(Explains pattern matching flags)
-  • \x1b[1;36mexplain xxd -r\x1b[0m                 (Explains reverse hexdump recovery)
-  • \x1b[1;36mexplain openssl s_client -connect localhost:30001\x1b[0m
-\x1b[1;36m========================================================================\x1b[0m`,
-        stderr: ''
-      };
-    }
-
-    const fullCmd = args.join(' ');
-    const targetCmd = args[0];
-    const flags = args.slice(1).filter(a => a.startsWith('-'));
-    const nonFlags = args.slice(1).filter(a => !a.startsWith('-'));
-    const doc = window.COMMAND_DOCS && window.COMMAND_DOCS[targetCmd];
-
-    let out = `\x1b[1;36m┌────────────────────────────────────────────────────────────────────────┐\x1b[0m\n`;
-    out += `\x1b[1;36m│\x1b[0m \x1b[1;32m🔍 DECONSTRUCTING COMMAND:\x1b[0m \x1b[1;37m${fullCmd}\x1b[0m\n`;
-    out += `\x1b[1;36m├────────────────────────────────────────────────────────────────────────┤\x1b[0m\n`;
-
-    if (doc) {
-      out += `\x1b[1;36m│\x1b[0m \x1b[1;33m[1] BASE TOOL:\x1b[0m \x1b[1;32m${doc.command}\x1b[0m (${doc.name})\n`;
-      out += `\x1b[1;36m│\x1b[0m     Category: ${doc.category}\n`;
-      out += `\x1b[1;36m│\x1b[0m     Purpose: ${doc.description}\n`;
-      out += `\x1b[1;36m│\x1b[0m     🛡️ \x1b[1;36mCyber Ops Role:\x1b[0m ${doc.securityNote}\n`;
-    } else {
-      out += `\x1b[1;36m│\x1b[0m \x1b[1;33m[1] BASE TOOL:\x1b[0m \x1b[1;32m${targetCmd}\x1b[0m (Standard Linux utility)\n`;
-    }
-
-    if (flags.length > 0) {
-      out += `\x1b[1;36m├────────────────────────────────────────────────────────────────────────┤\x1b[0m\n`;
-      out += `\x1b[1;36m│\x1b[0m \x1b[1;33m[2] ATTRIBUTES & FLAGS APPLIED:\x1b[0m\n`;
-      flags.forEach(flag => {
-        let match = null;
-        if (doc && doc.attributes) {
-          match = doc.attributes.find(a => 
-            a.flag === flag || 
-            a.longFlag === flag || 
-            a.flag.split(/[\s/]+/).includes(flag) ||
-            (flag.startsWith('-') && a.flag.includes(flag))
-          );
-        }
-        if (match) {
-          out += `\x1b[1;36m│\x1b[0m   • \x1b[1;32m${flag}\x1b[0m : ${match.meaning}\n`;
-          out += `\x1b[1;36m│\x1b[0m     🎯 \x1b[0;36mSecurity Impact:\x1b[0m ${match.securityUse}\n`;
-        } else {
-          out += `\x1b[1;36m│\x1b[0m   • \x1b[1;32m${flag}\x1b[0m : Flag parameter modifying execution behavior of ${targetCmd}.\n`;
-        }
-      });
-    }
-
-    if (nonFlags.length > 0) {
-      out += `\x1b[1;36m├────────────────────────────────────────────────────────────────────────┤\x1b[0m\n`;
-      out += `\x1b[1;36m│\x1b[0m \x1b[1;33m[3] OPERANDS & TARGET PATHS:\x1b[0m\n`;
-      nonFlags.forEach((nf, idx) => {
-        out += `\x1b[1;36m│\x1b[0m   • Target ${idx + 1}: \x1b[1;37m${nf}\x1b[0m (file, directory, or argument operand)\n`;
-      });
-    }
-
-    out += `\x1b[1;36m└────────────────────────────────────────────────────────────────────────┘\x1b[0m`;
-    return { stdout: out, stderr: '' };
   }
 
   cmdHelp(args) {
@@ -404,8 +296,8 @@ Examples:
     }
 
     const available = Object.keys(window.COMMAND_DOCS || {}).join(', ');
-    const helpMsg = 
-`========================================================================
+    const helpMsg =
+      `========================================================================
              🛡️ CYBER SECURITY LAB - COMMAND MANUAL & ATTRIBUTES 🛡️
 ========================================================================
 Available Commands:
@@ -463,8 +355,8 @@ Quick Controls:
           window.app.loadLevel(nextLvlId);
         }
         return {
-          stdout: 
-`\x1b[32m[+] SUCCESS! Password verified for Level ${currLvlId}.\x1b[0m
+          stdout:
+            `\x1b[32m[+] SUCCESS! Password verified for Level ${currLvlId}.\x1b[0m
 \x1b[1;36m[+] Level ${nextLvlId} UNLOCKED!\x1b[0m
 Switching user context to 'level${nextLvlId}'...
 Type 'ls -la' and 'hint' to begin Level ${nextLvlId}!`,
@@ -473,8 +365,8 @@ Type 'ls -la' and 'hint' to begin Level ${nextLvlId}!`,
       } else {
         const masterFlag = this.storage.getLevelPassword(34);
         return {
-          stdout: 
-`\x1b[1;32m🎉 CONGRATULATIONS! YOU HAVE COMPLETED ALL 35 LEVELS! 🎉\x1b[0m
+          stdout:
+            `\x1b[1;32m🎉 CONGRATULATIONS! YOU HAVE COMPLETED ALL 35 LEVELS! 🎉\x1b[0m
 You are now certified as a CyberLab Linux Wargame Master!
 Master Flag: ${masterFlag}`,
           stderr: ''
@@ -567,13 +459,6 @@ Master Flag: ${masterFlag}`,
       return { stdout: entries.map(e => e.name).join('\n'), stderr: '' };
     }
 
-    if (entries.length === 0 && this.assistantEnabled && this.storage.getCurrentLevel() === 3 && !showAll) {
-      return { 
-        stdout: '\x1b[1;33m🤖 [Cyber Assistant Tip]:\x1b[0m Standard "ls" hides files starting with a dot (.). Use "\x1b[1;32mls -la\x1b[0m" or "\x1b[1;32mls -a\x1b[0m" to reveal hidden dotfiles!', 
-        stderr: '' 
-      };
-    }
-
     return { stdout: entries.map(e => e.name).join('  '), stderr: '' };
   }
 
@@ -617,24 +502,8 @@ Master Flag: ${masterFlag}`,
 
       const res = this.vfs.readFile(f);
       if (!res.success) {
-        let err = res.error;
-        if (this.assistantEnabled) {
-          if (res.error.includes('Is a directory')) {
-            err += `\n\x1b[1;33m🤖 [Cyber Assistant Tip]:\x1b[0m '${f}' is a directory folder! Use '\x1b[1;32mcd ${f}\x1b[0m' to enter it, or '\x1b[1;32mls -la ${f}\x1b[0m' to view files.`;
-          } else if (files.length > 1) {
-            err += `\n\x1b[1;33m🤖 [Cyber Assistant Tip]:\x1b[0m The shell splits filenames on spaces. Wrap names with spaces in quotes: \x1b[1;32mcat "${args.join(' ')}"\x1b[0m`;
-          } else if (f === '-' || args.includes('-')) {
-            err += `\n\x1b[1;33m🤖 [Cyber Assistant Tip]:\x1b[0m A leading '-' is treated as a command option or stdin! To read file '-', use relative path: \x1b[1;32mcat ./- \x1b[0m`;
-          }
-        }
-        return { stdout: '', stderr: err };
+        return { stdout: '', stderr: res.error };
       }
-
-      if (this.assistantEnabled && this.storage.getCurrentLevel() === 4 && f.includes('-file') && !f.includes('-file07')) {
-        output.push(res.content + `\n\x1b[1;33m🤖 [Cyber Assistant Tip]:\x1b[0m Binary file detected! Tip: Use '\x1b[1;36mfile ./*\x1b[0m' to detect file MIME types and find the human-readable ASCII text file.`);
-        continue;
-      }
-
       output.push(res.content);
     }
 
@@ -909,8 +778,8 @@ Master Flag: ${masterFlag}`,
       return { stdout: pwd13, stderr: '' };
     }
     return {
-      stdout: 
-`00000000: 7061 7373 776f 7264 5f64 6174 6120 7465  password_data te
+      stdout:
+        `00000000: 7061 7373 776f 7264 5f64 6174 6120 7465  password_data te
 00000010: 7374 5f74 6f6b 656e 0a                    st_token.`,
       stderr: ''
     };
@@ -983,8 +852,8 @@ Master Flag: ${masterFlag}`,
 
   cmdNmap(args) {
     return {
-      stdout: 
-`Starting Nmap 7.94 ( https://nmap.org ) at 2026-09-16 12:00 UTC
+      stdout:
+        `Starting Nmap 7.94 ( https://nmap.org ) at 2026-09-16 12:00 UTC
 Nmap scan report for localhost (127.0.0.1)
 Host is up (0.00012s latency).
 
@@ -1027,8 +896,8 @@ Service detection performed. Connect to port 31004 using 'nc localhost 31004'.`,
     if (args.includes('-i')) {
       const pwd14 = this.storage.getLevelPassword(13);
       return {
-        stdout: 
-`Welcome to Level 14 GNU/Linux!
+        stdout:
+          `Welcome to Level 14 GNU/Linux!
 Authenticated successfully via identity key.
 Level 14 Password: ${pwd14}`,
         stderr: ''
@@ -1041,8 +910,8 @@ Level 14 Password: ${pwd14}`,
     if (args.includes('s_client')) {
       const pwd16 = this.storage.getLevelPassword(15);
       return {
-        stdout: 
-`CONNECTED(00000003)
+        stdout:
+          `CONNECTED(00000003)
 ---
 Certificate chain
  0 s:CN = cyberlab-tls-service
@@ -1062,8 +931,8 @@ Level 16 Password: ${pwd16}`,
   cmdCrontab(args) {
     if (args.includes('-l')) {
       return {
-        stdout: 
-`# Cron jobs for current session
+        stdout:
+          `# Cron jobs for current session
 * * * * * /usr/bin/cronjob_level22.sh > /tmp/level22_flag.txt 2>&1`,
         stderr: ''
       };
@@ -1124,8 +993,8 @@ Level 16 Password: ${pwd16}`,
       if (args.includes('-p') || args.includes('--patch')) {
         const pwd28 = this.storage.getLevelPassword(27);
         return {
-          stdout: 
-`commit 8a93b4ef01192837482019482
+          stdout:
+            `commit 8a93b4ef01192837482019482
 Author: DevSec <dev@cyberlab.internal>
 Date:   Mon Sep 15 14:02:11 2026 -0400
 
@@ -1146,8 +1015,8 @@ Date:   Mon Sep 15 13:45:00 2026 -0400
         };
       }
       return {
-        stdout: 
-`commit 8a93b4ef01192837482019482 (HEAD -> master)
+        stdout:
+          `commit 8a93b4ef01192837482019482 (HEAD -> master)
 Author: DevSec <dev@cyberlab.internal>
 Date:   Mon Sep 15 14:02:11 2026 -0400
 
@@ -1157,8 +1026,8 @@ Date:   Mon Sep 15 14:02:11 2026 -0400
     }
     if (sub === 'branch') {
       return {
-        stdout: 
-`* master
+        stdout:
+          `* master
   secret-feature
   remotes/origin/HEAD -> origin/master
   remotes/origin/dev`,
@@ -1170,8 +1039,8 @@ Date:   Mon Sep 15 14:02:11 2026 -0400
       if (branch === 'secret-feature') {
         const pwd29 = this.storage.getLevelPassword(28);
         return {
-          stdout: 
-`Switched to branch 'secret-feature'
+          stdout:
+            `Switched to branch 'secret-feature'
 [+] Secret feature branch loaded!
 Level 29 Password: ${pwd29}`,
           stderr: ''
@@ -1187,8 +1056,8 @@ Level 29 Password: ${pwd29}`,
     if (sub === 'show') {
       const pwd30 = this.storage.getLevelPassword(29);
       return {
-        stdout: 
-`tag secret-release
+        stdout:
+          `tag secret-release
 Tagger: Security Lead <lead@cyberlab.internal>
 
 Level 30 Password: ${pwd30}`,
@@ -1198,8 +1067,8 @@ Level 30 Password: ${pwd30}`,
     if (sub === 'diff') {
       const pwd31 = this.storage.getLevelPassword(30);
       return {
-        stdout: 
-`diff --git a/settings.json b/settings.json
+        stdout:
+          `diff --git a/settings.json b/settings.json
 --- a/settings.json
 +++ b/settings.json
 @@ -1,3 +1,4 @@

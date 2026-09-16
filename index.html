@@ -1,23 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cyber Security CLI Lab - 35 Progressive Linux Wargame Levels</title>
-  
+
   <!-- SEO, AEO & Social Sharing Meta Tags -->
-  <meta name="description" content="Master Linux commands and cybersecurity tooling with this interactive 35-level CLI wargame. Learn shell navigation, file permissions, cryptography, network recon, and privilege escalation with interactive command attribute inspectors.">
-  <meta name="keywords" content="cybersecurity lab, linux commands, cli wargame, bandit ctf, overthewire, linux security, shell terminal, privilege escalation, ethical hacking tutorial">
+  <meta name="description"
+    content="Master Linux commands and cybersecurity tooling with this interactive 35-level CLI wargame. Learn shell navigation, file permissions, cryptography, network recon, and privilege escalation with interactive command attribute inspectors.">
+  <meta name="keywords"
+    content="cybersecurity lab, linux commands, cli wargame, bandit ctf, overthewire, linux security, shell terminal, privilege escalation, ethical hacking tutorial">
   <meta name="author" content="Antigravity CyberLab">
   <meta name="theme-color" content="#060911">
   <meta property="og:title" content="Cyber Security CLI Lab - 35 Progressive Levels">
-  <meta property="og:description" content="Interactive browser-based Linux terminal wargame to master command attributes, forensics, and cybersecurity tools.">
+  <meta property="og:description"
+    content="Interactive browser-based Linux terminal wargame to master command attributes, forensics, and cybersecurity tools.">
   <meta property="og:type" content="website">
 
   <!-- Modern Fonts (Outfit & JetBrains Mono) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Outfit:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
 
   <!-- Boxicons Icon Library -->
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
@@ -26,6 +32,7 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/terminal.css">
 </head>
+
 <body>
 
   <!-- Top App Navigation Bar -->
@@ -76,11 +83,6 @@
         <span>Hint</span>
       </button>
 
-      <button class="btn-nav btn-assistant-toggle active" id="btnToggleAssistant" title="Toggle Smart Cyber Assistant Guidance">
-        <i class="bx bx-bot"></i>
-        <span id="assistantStatusText">Assistant: ON</span>
-      </button>
-
       <button class="btn-nav" id="btnOpenLevels" title="View All 35 Levels Map">
         <i class="bx bx-grid-alt"></i>
         <span>Levels (35)</span>
@@ -121,7 +123,8 @@
         <div class="objective-box">
           <h4><i class="bx bx-target-lock"></i> Mission Objective</h4>
           <p id="sidebarLevelObjective">
-            The password for Level 1 is stored in a file called 'readme' located in your home directory. Read this file to retrieve the password token.
+            The password for Level 1 is stored in a file called 'readme' located in your home directory. Read this file
+            to retrieve the password token.
           </p>
         </div>
 
@@ -138,9 +141,10 @@
       <div class="submission-card">
         <h3><i class="bx bx-key"></i> Submit Level Password</h3>
         <p>Found the token? Click it in the terminal to copy, or enter it below to advance.</p>
-        
+
         <form id="flagSubmitForm" class="flag-input-group">
-          <input type="text" id="sidebarFlagInput" class="flag-input" placeholder="Enter discovered password..." autocomplete="off" spellcheck="false" required>
+          <input type="text" id="sidebarFlagInput" class="flag-input" placeholder="Enter discovered password..."
+            autocomplete="off" spellcheck="false" required>
           <button type="submit" class="btn-submit">
             <span>Submit</span>
             <i class="bx bx-right-arrow-alt"></i>
@@ -151,10 +155,6 @@
       <!-- Quick Interactive Shortcuts -->
       <div class="quick-tools-card">
         <h4><i class="bx bx-wrench"></i> Fast Utilities</h4>
-        <button class="tool-action-btn" onclick="window.app.promptExplainCommand()">
-          <span><i class="bx bx-help-circle"></i> Explain Any Command (e.g. <code>explain ls -la</code>)</span>
-          <i class="bx bx-chevron-right"></i>
-        </button>
         <button class="tool-action-btn" onclick="window.app.openManualModal('ls')">
           <span><i class="bx bx-slider-alt"></i> View Command Attributes (e.g. <code>ls -a</code>)</span>
           <i class="bx bx-chevron-right"></i>
@@ -269,7 +269,7 @@
           <button class="btn-nav highlight" id="btnExportProgress">
             <i class="bx bx-download"></i> Export Progress File (JSON)
           </button>
-          
+
           <button class="btn-nav" id="btnImportProgressTrigger">
             <i class="bx bx-upload"></i> Import Progress Backup
           </button>
@@ -304,4 +304,5 @@
   <script src="js/commands.js"></script>
   <script src="js/app.js"></script>
 </body>
+
 </html>
