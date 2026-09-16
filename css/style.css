@@ -412,6 +412,49 @@ body {
   transform: translateY(-1px);
 }
 
+.interactive-cmd-tag {
+  border-color: rgba(0, 255, 204, 0.25);
+}
+
+.interactive-cmd-tag .tag-action {
+  font-size: 0.68rem;
+  background: rgba(0, 255, 204, 0.2);
+  color: var(--accent-cyan);
+  padding: 1px 5px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.interactive-cmd-tag:hover .tag-action {
+  background: var(--accent-cyan);
+  color: #000;
+}
+
+/* Smart Cyber Assistant Button */
+.btn-assistant-toggle {
+  border-color: rgba(0, 255, 204, 0.3);
+  color: var(--text-muted);
+}
+
+.btn-assistant-toggle.active {
+  background: rgba(0, 255, 204, 0.12);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  box-shadow: 0 0 12px rgba(0, 255, 204, 0.2);
+}
+
+.btn-assistant-toggle.active i {
+  color: var(--accent-cyan);
+  animation: botPulse 2s infinite ease-in-out;
+}
+
+@keyframes botPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); filter: drop-shadow(0 0 6px #00ffcc); }
+}
+
 /* Flag Submission Card */
 .submission-card {
   background: var(--bg-panel);

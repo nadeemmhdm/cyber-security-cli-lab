@@ -53,6 +53,20 @@ class App {
     document.getElementById('btnOpenLevels')?.addEventListener('click', () => this.openLevelsModal());
     document.getElementById('btnOpenSettings')?.addEventListener('click', () => this.openSettingsModal());
 
+    // Smart Cyber Assistant Toggle
+    const assistantBtn = document.getElementById('btnToggleAssistant');
+    if (assistantBtn) {
+      this.updateAssistantUI(this.engine.assistantEnabled);
+      assistantBtn.addEventListener('click', () => {
+        this.engine.assistantEnabled = !this.engine.assistantEnabled;
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('cyber_assistant_enabled', this.engine.assistantEnabled ? 'true' : 'false');
+        }
+        this.updateAssistantUI(this.engine.assistantEnabled);
+        this.showToast(this.engine.assistantEnabled ? '🤖 Cyber Assistant Activated!' : 'Cyber Assistant Paused', 'bx-bot');
+      });
+    }
+
     // Sound toggle
     const soundBtn = document.getElementById('btnToggleSound');
     if (soundBtn) {
@@ -188,17 +202,17 @@ class App {
   renderWelcome() {
     const banner = 
 `========================================================================
-     🛡️ CYBER SECURITY CLI WARGAME LAB (35 LEVELS) 🛡️
+   🛡️ OPERATION: CYBER SENTINEL - 35-STAGE INVESTIGATION LAB 🛡️
 ========================================================================
- Learn Linux commands, directory recon, file permissions, cryptography,
- network tools, and security privilege escalation.
- 
- • Fullscreen Mode: Click the expand icon in the top right of terminal
- • 1-Click Copy: Click any discovered password token to copy & auto-fill
- • Cyber Coins & Streak: Earn coins on level up to unlock hints
- • Type 'help' for command manual & attribute inspector
- • Type 'hint' if you get stuck on the current level
- • Type 'submit <password>' to unlock and advance to the next level
+ Investigate a simulated breach across 35 progressive cybersecurity operations.
+ Designed with an intelligent Cyber Assistant to guide beginners step-by-step!
+
+ 🤖 Cyber Assistant  : Active! Offers smart guidance & diagnostic tips
+ 🔍 Command Explainer: Type 'explain <cmd>' (e.g. 'explain ls -la')
+ 💡 Hint System      : Type 'hint' or click Hint (unlock with Cyber Coins)
+ 📖 Help & Manual    : Type 'help' to open interactive Command Inspector
+ 📋 1-Click Copy     : Click any discovered token in terminal to copy
+ ⛶ Fullscreen Mode   : Expand terminal with top-right button or Esc
 ========================================================================`;
     this.terminal.printBanner(banner);
   }
@@ -243,12 +257,12 @@ class App {
       cmdListEl.innerHTML = '';
       levelData.commandsUsed.forEach(cmd => {
         const span = document.createElement('span');
-        span.className = 'cmd-tag';
-        span.innerHTML = `<i class="bx bx-code-alt"></i> ${cmd}`;
-        span.title = `Click to inspect '${cmd}' attributes in manual`;
-        span.addEventListener('click', () => {
-          const root = cmd.split(' ')[0];
-          this.openManualModal(root);
+        span.className = 'cmd-tag interactive-cmd-tag';
+        span.innerHTML = `<i class="bx bx-terminal"></i> <strong>${cmd}</strong> <span class="tag-action">Try</span>`;
+        span.title = `Click to load '${cmd}' into terminal, or click manual to inspect flags`;
+        span.addEventListener('click', (e) => {
+          this.terminal.typeCommand(cmd + ' ');
+          this.showToast(`Loaded '${cmd}' into terminal!`, 'bx-terminal');
         });
         cmdListEl.appendChild(span);
       });
@@ -259,6 +273,18 @@ class App {
     if (printNotice) {
       this.terminal.printOutput(`\n\x1b[1;36m[>>> ENTERING ${levelData.title.toUpperCase()} <<<]\x1b[0m\n${levelData.objective}\n`);
     }
+  }
+
+  updateAssistantUI(active) {
+    const btn = document.getElementById('btnToggleAssistant');
+    const text = document.getElementById('assistantStatusText');
+    if (btn) btn.classList.toggle('active', !!active);
+    if (text) text.textContent = active ? 'Assistant: ON' : 'Assistant: OFF';
+  }
+
+  promptExplainCommand() {
+    this.terminal.typeCommand('explain ');
+    this.showToast('Type a command after explain (e.g. explain ls -la)', 'bx-help-circle');
   }
 
   // ==========================================

@@ -76,6 +76,11 @@
         <span>Hint</span>
       </button>
 
+      <button class="btn-nav btn-assistant-toggle active" id="btnToggleAssistant" title="Toggle Smart Cyber Assistant Guidance">
+        <i class="bx bx-bot"></i>
+        <span id="assistantStatusText">Assistant: ON</span>
+      </button>
+
       <button class="btn-nav" id="btnOpenLevels" title="View All 35 Levels Map">
         <i class="bx bx-grid-alt"></i>
         <span>Levels (35)</span>
@@ -146,6 +151,10 @@
       <!-- Quick Interactive Shortcuts -->
       <div class="quick-tools-card">
         <h4><i class="bx bx-wrench"></i> Fast Utilities</h4>
+        <button class="tool-action-btn" onclick="window.app.promptExplainCommand()">
+          <span><i class="bx bx-help-circle"></i> Explain Any Command (e.g. <code>explain ls -la</code>)</span>
+          <i class="bx bx-chevron-right"></i>
+        </button>
         <button class="tool-action-btn" onclick="window.app.openManualModal('ls')">
           <span><i class="bx bx-slider-alt"></i> View Command Attributes (e.g. <code>ls -a</code>)</span>
           <i class="bx bx-chevron-right"></i>

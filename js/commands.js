@@ -8,6 +8,7 @@ class CommandEngine {
     this.vfs = vfs;
     this.storage = storage;
     this.terminal = terminal;
+    this.assistantEnabled = typeof localStorage !== 'undefined' ? (localStorage.getItem('cyber_assistant_enabled') !== 'false') : true;
     this.env = {
       USER: 'level0',
       HOME: '/home/level0',
@@ -249,8 +250,24 @@ class CommandEngine {
           return { stdout: `Opening manual for '${args[0]}'... (Check the manual inspector modal)`, stderr: '' };
         }
         return { stdout: '', stderr: `No manual entry for ${args[0]}` };
-      default:
-        return { stdout: '', stderr: `bash: ${cmd}: command not found. Type 'help' for available commands.` };
+      case 'explain':
+        return this.cmdExplain(args);
+      case 'assistant':
+      case 'ai':
+        return this.cmdAssistant(args);
+      default: {
+        let msg = `bash: ${cmd}: command not found. Type 'help' for available commands.`;
+        if (this.assistantEnabled) {
+          const known = Object.keys(window.COMMAND_DOCS || {}).concat([
+            'submit', 'clear', 'hint', 'explain', 'assistant', 'su', 'history', 'cat', 'ls', 'cd', 'file', 'find', 'grep', 'pwd', 'whoami'
+          ]);
+          const suggestion = known.find(k => k.startsWith(cmd.slice(0, 2)) || Math.abs(k.length - cmd.length) <= 1);
+          if (suggestion) {
+            msg += `\n\x1b[1;33m🤖 [Cyber Assistant]:\x1b[0m Did you mean '\x1b[1;32m${suggestion}\x1b[0m'? (Run '\x1b[1;36mexplain ${suggestion}\x1b[0m' to learn its flags)`;
+          }
+        }
+        return { stdout: '', stderr: msg };
+      }
     }
   }
 
@@ -270,6 +287,97 @@ class CommandEngine {
       return { stdout: `[+] Displaying credential archive...\nLevel 27 Password: ${pwd27}`, stderr: '' };
     }
     return { stdout: scriptContent, stderr: '' };
+  }
+
+  cmdAssistant(args) {
+    if (args[0] === 'off' || args[0] === 'disable') {
+      this.assistantEnabled = false;
+      if (typeof localStorage !== 'undefined') localStorage.setItem('cyber_assistant_enabled', 'false');
+      window.app?.updateAssistantUI?.(false);
+      return { stdout: '🤖 Cyber Assistant disabled. (Type "assistant on" to re-enable)', stderr: '' };
+    } else if (args[0] === 'on' || args[0] === 'enable') {
+      this.assistantEnabled = true;
+      if (typeof localStorage !== 'undefined') localStorage.setItem('cyber_assistant_enabled', 'true');
+      window.app?.updateAssistantUI?.(true);
+      return { stdout: '🤖 Cyber Assistant enabled! Smart diagnostics and tips are now active.', stderr: '' };
+    }
+    return {
+      stdout: `🤖 Cyber Assistant is currently ${this.assistantEnabled ? '\x1b[1;32mACTIVE\x1b[0m' : '\x1b[1;31mDISABLED\x1b[0m'}.\nUsage: 'assistant on' | 'assistant off' | 'explain <command>'`,
+      stderr: ''
+    };
+  }
+
+  cmdExplain(args) {
+    if (args.length === 0) {
+      return {
+        stdout: 
+`\x1b[1;36m========================================================================\x1b[0m
+ \x1b[1;32m🔍 SMART COMMAND EXPLAINER (CYBER SENTINEL DECONSTRUCTOR)\x1b[0m
+\x1b[1;36m========================================================================\x1b[0m
+Type: \x1b[1;33mexplain <command> [attributes/flags] [arguments]\x1b[0m
+
+Examples:
+  • \x1b[1;36mexplain ls -la\x1b[0m                 (Explains long listing & hidden dotfiles)
+  • \x1b[1;36mexplain find -size 1033c\x1b[0m       (Explains file size filtering attributes)
+  • \x1b[1;36mexplain grep -i "pass" data.txt\x1b[0m(Explains pattern matching flags)
+  • \x1b[1;36mexplain xxd -r\x1b[0m                 (Explains reverse hexdump recovery)
+  • \x1b[1;36mexplain openssl s_client -connect localhost:30001\x1b[0m
+\x1b[1;36m========================================================================\x1b[0m`,
+        stderr: ''
+      };
+    }
+
+    const fullCmd = args.join(' ');
+    const targetCmd = args[0];
+    const flags = args.slice(1).filter(a => a.startsWith('-'));
+    const nonFlags = args.slice(1).filter(a => !a.startsWith('-'));
+    const doc = window.COMMAND_DOCS && window.COMMAND_DOCS[targetCmd];
+
+    let out = `\x1b[1;36m┌────────────────────────────────────────────────────────────────────────┐\x1b[0m\n`;
+    out += `\x1b[1;36m│\x1b[0m \x1b[1;32m🔍 DECONSTRUCTING COMMAND:\x1b[0m \x1b[1;37m${fullCmd}\x1b[0m\n`;
+    out += `\x1b[1;36m├────────────────────────────────────────────────────────────────────────┤\x1b[0m\n`;
+
+    if (doc) {
+      out += `\x1b[1;36m│\x1b[0m \x1b[1;33m[1] BASE TOOL:\x1b[0m \x1b[1;32m${doc.command}\x1b[0m (${doc.name})\n`;
+      out += `\x1b[1;36m│\x1b[0m     Category: ${doc.category}\n`;
+      out += `\x1b[1;36m│\x1b[0m     Purpose: ${doc.description}\n`;
+      out += `\x1b[1;36m│\x1b[0m     🛡️ \x1b[1;36mCyber Ops Role:\x1b[0m ${doc.securityNote}\n`;
+    } else {
+      out += `\x1b[1;36m│\x1b[0m \x1b[1;33m[1] BASE TOOL:\x1b[0m \x1b[1;32m${targetCmd}\x1b[0m (Standard Linux utility)\n`;
+    }
+
+    if (flags.length > 0) {
+      out += `\x1b[1;36m├────────────────────────────────────────────────────────────────────────┤\x1b[0m\n`;
+      out += `\x1b[1;36m│\x1b[0m \x1b[1;33m[2] ATTRIBUTES & FLAGS APPLIED:\x1b[0m\n`;
+      flags.forEach(flag => {
+        let match = null;
+        if (doc && doc.attributes) {
+          match = doc.attributes.find(a => 
+            a.flag === flag || 
+            a.longFlag === flag || 
+            a.flag.split(/[\s/]+/).includes(flag) ||
+            (flag.startsWith('-') && a.flag.includes(flag))
+          );
+        }
+        if (match) {
+          out += `\x1b[1;36m│\x1b[0m   • \x1b[1;32m${flag}\x1b[0m : ${match.meaning}\n`;
+          out += `\x1b[1;36m│\x1b[0m     🎯 \x1b[0;36mSecurity Impact:\x1b[0m ${match.securityUse}\n`;
+        } else {
+          out += `\x1b[1;36m│\x1b[0m   • \x1b[1;32m${flag}\x1b[0m : Flag parameter modifying execution behavior of ${targetCmd}.\n`;
+        }
+      });
+    }
+
+    if (nonFlags.length > 0) {
+      out += `\x1b[1;36m├────────────────────────────────────────────────────────────────────────┤\x1b[0m\n`;
+      out += `\x1b[1;36m│\x1b[0m \x1b[1;33m[3] OPERANDS & TARGET PATHS:\x1b[0m\n`;
+      nonFlags.forEach((nf, idx) => {
+        out += `\x1b[1;36m│\x1b[0m   • Target ${idx + 1}: \x1b[1;37m${nf}\x1b[0m (file, directory, or argument operand)\n`;
+      });
+    }
+
+    out += `\x1b[1;36m└────────────────────────────────────────────────────────────────────────┘\x1b[0m`;
+    return { stdout: out, stderr: '' };
   }
 
   cmdHelp(args) {
@@ -459,6 +567,13 @@ Master Flag: ${masterFlag}`,
       return { stdout: entries.map(e => e.name).join('\n'), stderr: '' };
     }
 
+    if (entries.length === 0 && this.assistantEnabled && this.storage.getCurrentLevel() === 3 && !showAll) {
+      return { 
+        stdout: '\x1b[1;33m🤖 [Cyber Assistant Tip]:\x1b[0m Standard "ls" hides files starting with a dot (.). Use "\x1b[1;32mls -la\x1b[0m" or "\x1b[1;32mls -a\x1b[0m" to reveal hidden dotfiles!', 
+        stderr: '' 
+      };
+    }
+
     return { stdout: entries.map(e => e.name).join('  '), stderr: '' };
   }
 
@@ -502,8 +617,24 @@ Master Flag: ${masterFlag}`,
 
       const res = this.vfs.readFile(f);
       if (!res.success) {
-        return { stdout: '', stderr: res.error };
+        let err = res.error;
+        if (this.assistantEnabled) {
+          if (res.error.includes('Is a directory')) {
+            err += `\n\x1b[1;33m🤖 [Cyber Assistant Tip]:\x1b[0m '${f}' is a directory folder! Use '\x1b[1;32mcd ${f}\x1b[0m' to enter it, or '\x1b[1;32mls -la ${f}\x1b[0m' to view files.`;
+          } else if (files.length > 1) {
+            err += `\n\x1b[1;33m🤖 [Cyber Assistant Tip]:\x1b[0m The shell splits filenames on spaces. Wrap names with spaces in quotes: \x1b[1;32mcat "${args.join(' ')}"\x1b[0m`;
+          } else if (f === '-' || args.includes('-')) {
+            err += `\n\x1b[1;33m🤖 [Cyber Assistant Tip]:\x1b[0m A leading '-' is treated as a command option or stdin! To read file '-', use relative path: \x1b[1;32mcat ./- \x1b[0m`;
+          }
+        }
+        return { stdout: '', stderr: err };
       }
+
+      if (this.assistantEnabled && this.storage.getCurrentLevel() === 4 && f.includes('-file') && !f.includes('-file07')) {
+        output.push(res.content + `\n\x1b[1;33m🤖 [Cyber Assistant Tip]:\x1b[0m Binary file detected! Tip: Use '\x1b[1;36mfile ./*\x1b[0m' to detect file MIME types and find the human-readable ASCII text file.`);
+        continue;
+      }
+
       output.push(res.content);
     }
 
