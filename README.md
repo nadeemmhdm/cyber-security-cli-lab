@@ -21,7 +21,7 @@ Inspired by **OverTheWire Bandit** and **TryHackMe**, featuring an in-browser Li
 - **Dynamic Random Passwords**: Every lab run generates unique, random CTF tokens (e.g. `cyb3r_955fafde_p4ss`). Passwords change dynamically so learners must use real tools to find them.
 - **Interactive Command Manual & Attribute Inspector**: Click any Linux command (e.g. `ls`, `grep`, `find`) to see what every flag does (e.g. `ls -a`, `grep -i`, `find -perm -4000`) with cybersecurity context and a click-to-try button.
 - **3-Tier Hint System**: Get gentle conceptual nudges, recommended flags, or full syntax blueprints when stuck.
-- **Zero Backend Required**: Runs 100% in the browser with in-memory Virtual File System (VFS) and `localStorage` persistence.
+- **Complete Solutions Manual**: Full step-by-step solutions for all 35 levels with command explanations are available in [docs/solutions.md](docs/solutions.md).
 - **Multi-Platform Access**: Launch via GitHub Pages, Docker, Python, Node, or by double-clicking a file!
 
 ---
