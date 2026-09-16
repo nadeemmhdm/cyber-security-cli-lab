@@ -135,6 +135,22 @@ body {
   font-size: 1.1rem;
 }
 
+.stat-pill.streak-pill i {
+  color: #f97316;
+  text-shadow: 0 0 10px rgba(249, 115, 22, 0.6);
+  animation: flamePulse 2s infinite ease-in-out;
+}
+
+.stat-pill.coins-pill i {
+  color: #fbbf24;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.6);
+}
+
+@keyframes flamePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); filter: drop-shadow(0 0 6px #f97316); }
+}
+
 .stat-pill strong {
   color: #fff;
 }
@@ -440,6 +456,27 @@ body {
 .flag-input:focus {
   border-color: var(--accent-cyan);
   box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+}
+
+.btn-paste-flag {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  color: #94a3b8;
+  padding: 0 14px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-paste-flag:hover {
+  background: rgba(0, 255, 204, 0.15);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  transform: translateY(-1px);
 }
 
 .btn-submit {
@@ -1129,4 +1166,112 @@ body {
   .attributes-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* =========================================================
+   HINT COINS UNLOCK SYSTEM
+   ========================================================= */
+.hint-coins-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  margin-bottom: 6px;
+}
+
+.hint-coins-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #fbbf24;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+}
+
+.hint-streak-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #f97316;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+.btn-unlock-hint {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border: none;
+  color: #000;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-unlock-hint:hover {
+  box-shadow: 0 0 14px rgba(251, 191, 36, 0.5);
+  transform: translateY(-1px);
+}
+
+.hint-locked-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+
+.hint-locked-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* =========================================================
+   FLOATING TOAST NOTIFICATION
+   ========================================================= */
+.toast-popup {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #0f172a;
+  border: 1px solid var(--accent-cyan);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7), 0 0 20px var(--accent-cyan-glow);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  z-index: 9999999;
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast-popup.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.toast-popup i {
+  color: var(--accent-cyan);
+  font-size: 1.35rem;
 }

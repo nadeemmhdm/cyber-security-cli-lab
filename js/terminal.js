@@ -1,7 +1,7 @@
 /**
  * Interactive Cyber Terminal Engine
  * Supports ANSI color translation, command history, Tab auto-completion,
- * keyboard navigation, and audio sound synthesis.
+ * keyboard navigation, audio sound synthesis, Fullscreen mode, and Click-to-Copy tokens.
  */
 
 class Terminal {
@@ -13,6 +13,7 @@ class Terminal {
     this.currentPromptUser = 'level0';
     this.currentPromptHost = 'cyberlab';
     this.soundEnabled = true;
+    this.isFullscreen = false;
 
     this.audioCtx = null;
     this.initAudio();
@@ -90,6 +91,9 @@ class Terminal {
             <i class="bx bx-terminal"></i> bash - <span id="termSessionTitle">level0@cyberlab:~</span>
           </div>
           <div class="terminal-header-actions">
+            <button class="term-header-btn" id="btnFullscreenToggle" title="Toggle Terminal Fullscreen (F11/Esc)">
+              <i class="bx bx-fullscreen"></i>
+            </button>
             <button class="term-header-btn" id="btnScanlineToggle" title="Toggle CRT Scanlines">
               <i class="bx bx-tv"></i>
             </button>
@@ -113,6 +117,7 @@ class Terminal {
       </div>
     `;
 
+    this.screenEl = document.getElementById('terminalScreen');
     this.outputEl = document.getElementById('terminalOutput');
     this.inputEl = document.getElementById('terminalInput');
     this.promptPathEl = document.getElementById('promptPath');
@@ -120,9 +125,12 @@ class Terminal {
     this.sessionTitleEl = document.getElementById('termSessionTitle');
     this.scanlinesEl = document.getElementById('terminalScanlines');
     this.bodyEl = document.getElementById('terminalBody');
+    this.btnFullscreen = document.getElementById('btnFullscreenToggle');
 
     // Click anywhere on terminal body to focus input
-    this.bodyEl.addEventListener('click', () => {
+    this.bodyEl.addEventListener('click', (e) => {
+      // Don't focus input if user clicked a copyable token
+      if (e.target.closest('.copyable-token')) return;
       this.inputEl.focus();
     });
 
@@ -130,6 +138,67 @@ class Terminal {
     document.getElementById('btnScanlineToggle').addEventListener('click', () => {
       this.scanlinesEl.classList.toggle('active');
     });
+
+    this.btnFullscreen.addEventListener('click', () => this.toggleFullscreen());
+
+    // Listen for click on copyable tokens inside terminal
+    this.outputEl.addEventListener('click', (e) => {
+      const tokenSpan = e.target.closest('.copyable-token');
+      if (tokenSpan) {
+        const textToCopy = tokenSpan.dataset.copy || tokenSpan.innerText.trim();
+        this.copyToClipboard(textToCopy, tokenSpan);
+      }
+    });
+
+    // Escape key exits fullscreen
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.isFullscreen) {
+        this.toggleFullscreen(false);
+      }
+    });
+  }
+
+  toggleFullscreen(forceState = null) {
+    this.isFullscreen = forceState !== null ? forceState : !this.isFullscreen;
+    this.screenEl.classList.toggle('terminal-fullscreen', this.isFullscreen);
+
+    const icon = this.btnFullscreen.querySelector('i');
+    if (icon) {
+      icon.className = this.isFullscreen ? 'bx bx-exit-fullscreen' : 'bx bx-fullscreen';
+    }
+    this.btnFullscreen.title = this.isFullscreen ? 'Exit Fullscreen (Esc)' : 'Toggle Terminal Fullscreen (F11/Esc)';
+
+    // Scroll to bottom and refocus
+    setTimeout(() => {
+      this.scrollToBottom();
+      this.inputEl.focus();
+    }, 100);
+  }
+
+  async copyToClipboard(text, element = null) {
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      if (element) {
+        element.classList.add('copied');
+        setTimeout(() => element.classList.remove('copied'), 1500);
+      }
+
+      // Auto-fill sidebar flag input for frictionless play!
+      const flagInput = document.getElementById('sidebarFlagInput');
+      if (flagInput) {
+        flagInput.value = text;
+        flagInput.focus();
+      }
+
+      // Show sleek toast notification
+      if (window.app?.showToast) {
+        window.app.showToast(`📋 Copied "${text}" to clipboard!`, 'bx-copy');
+      }
+      this.playKeystrokeSound();
+    } catch (e) {
+      console.warn('Clipboard write failed', e);
+    }
   }
 
   updatePrompt(user, path) {
@@ -297,9 +366,11 @@ class Terminal {
       .replace(/'/g, '&#039;');
   }
 
-  // Converts basic ANSI color escape codes to styled HTML
+  // Converts basic ANSI color escape codes to styled HTML and wraps passwords in click-to-copy tokens
   ansiToHtml(str) {
     let s = this.escapeHtml(str);
+
+    // ANSI escape code parsing
     s = s.replace(/\x1b\[32m/g, '<span class="ansi-green">');
     s = s.replace(/\x1b\[1;36m/g, '<span class="ansi-cyan-bold">');
     s = s.replace(/\x1b\[1;32m/g, '<span class="ansi-green-bold">');
@@ -308,6 +379,20 @@ class Terminal {
     s = s.replace(/\x1b\[36m/g, '<span class="ansi-cyan">');
     s = s.replace(/\x1b\[1m/g, '<span class="ansi-bold">');
     s = s.replace(/\x1b\[0m/g, '</span>');
+
+    // Automatic detection of passwords/tokens for 1-Click Copy
+    // Matches:
+    // 1) cyb3r_xxxxxxxx_xxxx or similar dynamic random passwords
+    // 2) CYB3R_M4ST3R_..._2026
+    // 3) Tokens following "Password: <token>" or "Password is <token>"
+    s = s.replace(/\b([a-z0-9_]{3,10}_[a-f0-9]{8}_[a-z0-9_]{3,10})\b/gi, (match) => {
+      return `<span class="copyable-token" data-copy="${match}" title="Click to copy password!"><span class="token-text">${match}</span><i class="bx bx-copy copy-icon"></i></span>`;
+    });
+
+    s = s.replace(/\b(CYB3R_M4ST3R_[A-F0-9]{8}_2026)\b/g, (match) => {
+      return `<span class="copyable-token" data-copy="${match}" title="Click to copy Master Flag!"><span class="token-text">${match}</span><i class="bx bx-copy copy-icon"></i></span>`;
+    });
+
     return s;
   }
 }

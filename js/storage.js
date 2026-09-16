@@ -1,6 +1,7 @@
 /**
  * Progress Persistence and Storage Management
- * Handles localStorage auto-save, export, import, and dynamic random level passwords.
+ * Handles localStorage auto-save, export, import, dynamic random level passwords,
+ * Cyber Coins economy, Daily Practice Streaks, and Hint Unlocks.
  */
 
 function generateRandomHex(length = 8) {
@@ -29,6 +30,7 @@ class StorageManager {
   constructor() {
     this.storageKey = 'cyberlab_progress_v1';
     this.state = this.loadState();
+    this.checkDailyStreak();
   }
 
   generateAllLevelPasswords() {
@@ -41,11 +43,19 @@ class StorageManager {
 
   getDefaultState() {
     const passwords = this.generateAllLevelPasswords();
+    const today = new Date().toISOString().slice(0, 10);
     return {
       currentLevel: 0,
       unlockedLevels: [0],
       completedLevels: [],
       score: 0,
+      coins: 100, // Starter bonus coins for hints!
+      streak: {
+        count: 1,
+        lastDate: today,
+        claimedToday: false
+      },
+      unlockedHints: {}, // { levelId: [0, 1] }
       commandsRun: 0,
       startedAt: new Date().toISOString(),
       lastActive: new Date().toISOString(),
@@ -64,6 +74,11 @@ class StorageManager {
           if (!merged.levelPasswords || Object.keys(merged.levelPasswords).length < 35) {
             merged.levelPasswords = this.generateAllLevelPasswords();
           }
+          if (merged.coins === undefined) merged.coins = 100;
+          if (!merged.streak) {
+            merged.streak = { count: 1, lastDate: new Date().toISOString().slice(0, 10), claimedToday: false };
+          }
+          if (!merged.unlockedHints) merged.unlockedHints = {};
           return merged;
         }
       }
@@ -80,6 +95,88 @@ class StorageManager {
     } catch (e) {
       console.warn('Could not save state to localStorage', e);
     }
+  }
+
+  checkDailyStreak() {
+    const today = new Date().toISOString().slice(0, 10);
+    const streak = this.state.streak || { count: 1, lastDate: today, claimedToday: false };
+
+    if (!streak.lastDate) {
+      streak.lastDate = today;
+      streak.count = 1;
+      streak.claimedToday = true;
+      this.saveState();
+      return { rewarded: true, count: 1, bonus: 25 };
+    }
+
+    if (streak.lastDate === today) {
+      return { rewarded: false, count: streak.count, bonus: 0 };
+    }
+
+    const prevDate = new Date(streak.lastDate);
+    const currDate = new Date(today);
+    const diffTime = Math.abs(currDate - prevDate);
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) {
+      // Consecutive day streak!
+      streak.count += 1;
+      streak.lastDate = today;
+      streak.claimedToday = true;
+      const bonus = Math.min(100, 25 * streak.count);
+      this.addCoins(bonus);
+      this.saveState();
+      return { rewarded: true, count: streak.count, bonus };
+    } else if (diffDays > 1) {
+      // Streak broken, reset to 1
+      streak.count = 1;
+      streak.lastDate = today;
+      streak.claimedToday = true;
+      const bonus = 25;
+      this.addCoins(bonus);
+      this.saveState();
+      return { rewarded: true, count: 1, bonus };
+    }
+
+    return { rewarded: false, count: streak.count, bonus: 0 };
+  }
+
+  addCoins(amount) {
+    this.state.coins = (this.state.coins || 0) + amount;
+    this.saveState();
+    return this.state.coins;
+  }
+
+  spendCoins(amount) {
+    if ((this.state.coins || 0) >= amount) {
+      this.state.coins -= amount;
+      this.saveState();
+      return true;
+    }
+    return false;
+  }
+
+  isHintUnlocked(levelId, tierIndex) {
+    // Tier 1 (index 0) is always free for learners
+    if (tierIndex === 0) return true;
+
+    const list = this.state.unlockedHints?.[levelId];
+    return Array.isArray(list) && list.includes(tierIndex);
+  }
+
+  unlockHint(levelId, tierIndex, cost) {
+    if (this.isHintUnlocked(levelId, tierIndex)) return { success: true };
+
+    if (this.spendCoins(cost)) {
+      if (!this.state.unlockedHints) this.state.unlockedHints = {};
+      if (!this.state.unlockedHints[levelId]) this.state.unlockedHints[levelId] = [0];
+      if (!this.state.unlockedHints[levelId].includes(tierIndex)) {
+        this.state.unlockedHints[levelId].push(tierIndex);
+      }
+      this.saveState();
+      return { success: true, remainingCoins: this.state.coins };
+    }
+    return { success: false, needed: cost, available: this.state.coins || 0 };
   }
 
   getLevelPassword(levelId) {
@@ -106,6 +203,8 @@ class StorageManager {
     if (prevLevel >= 0 && !this.state.completedLevels.includes(prevLevel)) {
       this.state.completedLevels.push(prevLevel);
       this.state.score += 100;
+      // Award Cyber Coins for completing level!
+      this.addCoins(50);
     }
     if (passwordDiscovered) {
       this.state.passwordsDiscovered[prevLevel] = passwordDiscovered;

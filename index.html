@@ -50,6 +50,14 @@
         <i class="bx bx-check-shield"></i>
         <span>Done: <strong id="headerCompletedCount">0/35</strong></span>
       </div>
+      <div class="stat-pill streak-pill" title="Daily Practice Streak (Play daily for bonus coins!)">
+        <i class="bx bxs-flame"></i>
+        <span id="headerStreakCount">1 Day</span>
+      </div>
+      <div class="stat-pill coins-pill" title="Cyber Coins (Earn by completing levels, spend on hints)">
+        <i class="bx bxs-coin-stack"></i>
+        <span id="headerCoinsCount">100</span>
+      </div>
       <div class="stat-pill" title="Current Score">
         <i class="bx bx-trophy"></i>
         <strong id="headerScoreCount">0 PTS</strong>
@@ -85,26 +93,11 @@
 
   <!-- Main Application Grid -->
   <main class="app-main">
-    <!-- Left Column: Terminal & Mobile Controls -->
+    <!-- Left Column: Terminal Emulator (Clean Full Height - No Cluttered Bottom Toolbar) -->
     <section class="terminal-column" aria-label="Interactive Terminal">
       <div class="terminal-container" id="terminalContainer">
         <!-- Injected dynamically by Terminal class -->
       </div>
-
-      <!-- Quick Virtual Keys for Mobile / Rapid Typing -->
-      <nav class="mobile-virtual-toolbar" aria-label="Terminal Virtual Controls">
-        <button class="virtual-key accent" data-action="tab" title="Auto-complete command or filename">Tab</button>
-        <button class="virtual-key" data-action="ctrl-c" title="Cancel line">Ctrl+C</button>
-        <button class="virtual-key" data-insert=" | " title="Pipe output">|</button>
-        <button class="virtual-key" data-insert="-" title="Dash">-</button>
-        <button class="virtual-key" data-insert="/" title="Slash">/</button>
-        <button class="virtual-key" data-insert="~" title="Home directory">~</button>
-        <button class="virtual-key" data-insert="." title="Current directory">.</button>
-        <button class="virtual-key" data-insert="ls -la" title="List all files">ls -la</button>
-        <button class="virtual-key" data-action="hint" title="Show level hints">Hint</button>
-        <button class="virtual-key" data-action="clear" title="Clear terminal screen">Clear</button>
-        <button class="virtual-key accent" data-action="enter" title="Execute command">Enter</button>
-      </nav>
     </section>
 
     <!-- Right Column: Mission Briefing, Recommended Attributes & Flag Submission -->
@@ -136,13 +129,16 @@
         </div>
       </div>
 
-      <!-- Password / Flag Submission Card -->
+      <!-- Password / Flag Submission Card with Easy Paste -->
       <div class="submission-card">
         <h3><i class="bx bx-key"></i> Submit Level Password</h3>
-        <p>Found the token? Submit it here or run <code>submit &lt;password&gt;</code> directly in the terminal to unlock the next level.</p>
+        <p>Found the token? Click it in the terminal to copy, or enter it below to advance.</p>
         
         <form id="flagSubmitForm" class="flag-input-group">
           <input type="text" id="sidebarFlagInput" class="flag-input" placeholder="Enter discovered password..." autocomplete="off" spellcheck="false" required>
+          <button type="button" class="btn-paste-flag" id="btnPasteFlag" title="Paste from Clipboard">
+            <i class="bx bx-paste"></i>
+          </button>
           <button type="submit" class="btn-submit">
             <span>Submit</span>
             <i class="bx bx-right-arrow-alt"></i>
@@ -244,7 +240,15 @@
         <button class="modal-close" aria-label="Close Settings">&times;</button>
       </div>
       <div class="settings-modal-body">
-        <div class="settings-stats-row">
+        <div class="settings-stats-row" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="settings-stat-box">
+            <div class="val" id="settingsCoinsCount" style="color: #fbbf24;">100</div>
+            <div class="lbl">Coins</div>
+          </div>
+          <div class="settings-stat-box">
+            <div class="val" id="settingsStreakCount" style="color: #f97316;">1 Day</div>
+            <div class="lbl">Streak</div>
+          </div>
           <div class="settings-stat-box">
             <div class="val" id="settingsUnlockedCount">1</div>
             <div class="lbl">Unlocked</div>
@@ -252,10 +256,6 @@
           <div class="settings-stat-box">
             <div class="val" id="settingsCompletedCount">0</div>
             <div class="lbl">Completed</div>
-          </div>
-          <div class="settings-stat-box">
-            <div class="val" id="settingsTotalCmds">0</div>
-            <div class="lbl">Commands Run</div>
           </div>
         </div>
 
@@ -281,6 +281,12 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Floating Toast Notification for Easy Copy & Game Events -->
+  <div class="toast-popup" id="toastPopup" role="status" aria-live="polite">
+    <i class="bx bx-copy" id="toastIcon"></i>
+    <span id="toastMsg">Password copied to clipboard!</span>
   </div>
 
   <!-- JavaScript Modules in Dependency Order -->
